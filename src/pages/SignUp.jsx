@@ -94,14 +94,14 @@ export const SignUp = () => {
   const sendToServer = async (username, address, message, signature) => {
     setLoading(true);
     try {
-        const response = await axios.post('http://localhost:4000/create-account', {
+        const response = await axios.post('https://api.breakaway.community/create-account', {
             username,
             address,
             message,
             signature,
         });
 
-        console.log("Response data:", response.data);
+        console.log("Response data:", response);
         setLoading(false);
         return response.data;
     } catch (error) {
@@ -112,21 +112,25 @@ export const SignUp = () => {
 };
 
   const handleFinalStage = async () => {
-    const response = await sendToServer (username, walletAddress, messageToSign, signedMessage);
+    try {
+      const response = await sendToServer (username, walletAddress, messageToSign, signedMessage);
     
-    if(response.success) {
+    if(response?.success) {
           setServerResponse(response);  
           setMsg("created hive account successfully")
           setIsCreated(true);
 
         } else {
-          setMsg(response.error)
+          setMsg(response?.data.error)
         }
         console.log(response)
+      } catch (error) {
+        setMsg(error?.response?.data.error)
+    }
   }
 
   const redirect = () => {
-    window.open('http://localhost:3000', '_blank');
+    window.open('https://bitcoinmachines.community/', '_blank');
     // setPage("login")
   }  
 
