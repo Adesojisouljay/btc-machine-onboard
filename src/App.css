@@ -1,24 +1,108 @@
-.App {
-  text-align: center;
-  margin: 20px;
+body {
+  background-color: #282c34;
+  font-family: Arial, sans-serif;
+  color: #ffffff;
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-image: url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSskexAciO-fd_xOQICk-cEdmmh2mKaQarmkA&s');
 }
 
-form {
+.app-container {
+  background-color: #3a3f47;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  max-width: 500px;
+  width: 600px;
+  text-align: center;
+}
+
+h1 {
+  color: #61dafb;
+  font-size: 24px;
+}
+
+.error{
+  color: rgb(209, 93, 93);
+  font-size: 16px;
+}
+.success{
+  color: rgb(107, 236, 107);
+  font-size: 16px;
+}
+
+.form-container {
+  display: flex;
+  flex-direction: column;
   margin: 20px 0;
+  width: 100%;
+}
+
+.acc-form{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 30px;
 }
 
 label {
-  margin-right: 10px;
+  margin-bottom: 10px;
+  font-size: 18px;
 }
 
 input {
-  margin-right: 10px;
+  padding: 10px;
+  border-radius: 5px;
+  border: none;
+  margin-top: 5px;
+  font-size: 16px;
+  width: 80%;
 }
 
-button {
-  padding: 5px 10px;
+.submit-button {
+  align-items: center;
+  gap: 15px;
+  padding: 10px;
+  background-color: #61dafb;
+  color: #282c34;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 20px;
+  margin-top: 15px;
+  width: 50%;
+}
+
+.submit-button:hover {
+  background-color: #4db3e4;
+}
+
+.wallet-info, .message-info, .server-response {
+  margin-top: 20px;
+  background-color: #21252b;
+  padding: 15px;
+  border-radius: 5px;
 }
 
 h3 {
-  margin-top: 20px;
+  color: #61dafb;
+}
+
+p {
+  word-wrap: break-word;
+}
+
+.keychain-logo{
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+}
+
+.links{
+  color: beige;
 }
