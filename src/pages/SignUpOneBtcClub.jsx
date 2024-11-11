@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 // import './App.css';
 
-export const SignUp = () => {
+export const SignUpOneBtcClub = () => {
   const [username, setUsername] = useState('');
   const [walletAddress, setWalletAddress] = useState(null);
   const [signedMessage, setSignedMessage] = useState(null);
@@ -94,7 +94,7 @@ export const SignUp = () => {
   const sendToServer = async (username, address, message, signature) => {
     setLoading(true);
     try {
-        const response = await axios.post('https://api.breakaway.community/create-account', {
+        const response = await axios.post('https://api.breakaway.community/create-one-btc-account', {
             username,
             address,
             message,
@@ -130,7 +130,7 @@ export const SignUp = () => {
   }
 
   const redirect = () => {
-    window.open('https://bitcoinmachines.community/', '_blank');
+    window.open("https://onebitcoinclub.org", '_blank');
     // setPage("login")
   }  
 
@@ -219,11 +219,11 @@ export const SignUp = () => {
 
   const addToKeychain = async() => {
     const keys = serverResponse.keys;
-    const metadata = {
-      signature: signedMessage,
-      message: messageToSign,
-      btcAddress: walletAddress
-  };
+//     const metadata = {
+//       signature: signedMessage,
+//       message: messageToSign,
+//       btcAddress: walletAddress
+//   };
 
     try {
         await addAccountTokeychain(username, {
@@ -244,7 +244,7 @@ export const SignUp = () => {
   return (
     <div className="app-container">
       <h1>Create A Bitcoin Social Account</h1>
-      <p>You must have a bitcoin machine to get started</p>
+      <p>You need at least 0.00005btc to get started</p>
       <p className={serverResponse?.success ? "success" : "error"}>{msg}</p>
       {step === 1 && <div className="form-container">
         <form onSubmit={handleCreateAccount} className='acc-form'>
