@@ -17,6 +17,7 @@ export const SignUpOneBtcClub = () => {
   const [msg, setMsg] = useState("");
   const [downloaded, setDownloaded] = useState(false);
   const [keychainAdded, setKeychainAdded] = useState(false);
+  const [keys, setKeys] = useState(null)
 
   const handleCreateAccount = async (event) => {
     event.preventDefault();
@@ -91,14 +92,17 @@ export const SignUpOneBtcClub = () => {
     });
   };
 
-  const sendToServer = async (username, address, message, signature) => {
+  const createRequest = async (username, address, message, signature, keys) => {
     setLoading(true);
+    console.log(keys)
     try {
-        const response = await axios.post('https://api.breakaway.community/create-one-btc-account', {
+        // const response = await axios.post('http://localhost:4000/create-one-btc-account', {
+            const response = await axios.post('https://api.breakaway.community/create-one-btc-account', {
             username,
             address,
             message,
             signature,
+            accountKeys: keys
         });
 
         console.log("Response data:", response);
@@ -111,9 +115,30 @@ export const SignUpOneBtcClub = () => {
     }
 };
 
-  const handleFinalStage = async () => {
+const getAccountKeys = async (username) => {
+    setLoading(true);
     try {
-      const response = await sendToServer (username, walletAddress, messageToSign, signedMessage);
+        const response = await axios.post('http://localhost:4000/get-account-keys', { username });
+        console.log("Full response:", response.data);
+
+        if (response.data && response.data.accountDetails) {
+            setKeys(response.data.accountDetails);
+            console.log("Account details set successfully");
+        } else {
+            console.error("Account details not found in the response");
+        }
+
+        setLoading(false);
+    } catch (error) {
+        console.error('Error sending data to server:', error);
+        setLoading(false);
+        throw error;
+    }
+};
+
+  const createHiveAccount = async () => {
+    try {
+      const response = await createRequest(username, walletAddress, messageToSign, signedMessage, keys);
     
     if(response?.success) {
           setServerResponse(response);  
@@ -131,21 +156,20 @@ export const SignUpOneBtcClub = () => {
 
   const redirect = () => {
     window.open("https://onebitcoinclub.org", '_blank');
-    // setPage("login")
   }  
 
   function downloadKeys() {
   
     const content = `
-  Master Password: ${serverResponse?.keys?.master}
+        Master Password: ${keys?.masterPassword}
 
-  Owner Key: ${serverResponse?.keys?.owner}
-  
-  Active Key: ${serverResponse?.keys?.active}
-  
-  Posting Key: ${serverResponse?.keys?.posting}
-  
-  Memo Key: ${serverResponse?.keys?.memo}
+        Owner Key: ${keys?.owner}
+        
+        Active Key: ${keys?.active}
+        
+        Posting Key: ${keys?.posting}
+        
+        Memo Key: ${keys?.memo}
     `;
   
     const blob = new Blob([content], { type: 'text/plain' });
@@ -218,13 +242,6 @@ export const SignUpOneBtcClub = () => {
 }
 
   const addToKeychain = async() => {
-    const keys = serverResponse.keys;
-//     const metadata = {
-//       signature: signedMessage,
-//       message: messageToSign,
-//       btcAddress: walletAddress
-//   };
-
     try {
         await addAccountTokeychain(username, {
             active: keys.active,
@@ -261,57 +278,61 @@ export const SignUpOneBtcClub = () => {
         </form>
       </div>}
       
-      {step === 2 && <>
+    {step === 2 && (
+    <>
         {walletAddress && (
-          <div className="wallet-info">
+        <div className="wallet-info">
             <h3>Wallet Address:</h3>
             <p>{walletAddress}</p>
-          </div>
+        </div>
         )}
 
         {signedMessage && (
-          <div className="message-info">
+        <div className="message-info">
             <h3>Signed Message:</h3>
             <p>{JSON.stringify(signedMessage)}</p>
-          </div>
+        </div>
         )}
 
-        {serverResponse?.success && (
-          <div className="server-response">
-            <h3>Server Response:</h3>
-            {!downloaded && <button 
-              className="submit-button"
-              onClick={downloadKeys}
-            >
-              Download keys
+        {keys ? (
+        <div className="server-response">
+            <h3>Account Keys:</h3>
+            {!downloaded && <button className="submit-button" onClick={downloadKeys}>
+            Download Keys
             </button>}
             <p>Username: {username}</p>
-            <p>Master Password: {serverResponse?.keys?.master}</p>
-            <p>Owner Key: {serverResponse?.keys?.owner}</p>
-            <p>Active key: {serverResponse?.keys?.active}</p>
-            <p>Posting key: {serverResponse?.keys?.posting}</p>
-            <p>Memo key: {serverResponse?.keys?.memo}</p>
-          </div>
+            <p>Master Password: {keys?.masterPassword}</p>
+            <p>Owner Key: {keys?.owner}</p>
+            <p>Active Key: {keys?.active}</p>
+            <p>Posting Key: {keys?.posting}</p>
+            <p>Memo Key: {keys?.memo}</p>
+        </div>
+        ) : (
+        <button className="submit-button" onClick={() => getAccountKeys(username)}>
+            {loading ? 'Getting keys...' : 'Get Keys'}
+        </button>
         )}
 
-        {!isCreated && <button 
-          className="submit-button"
-          onClick={handleFinalStage}
-        >
-          {loading ? "Creating account..." : "Create Account"}
-        </button>}
-        {downloaded && (!keychainAdded ? 
-        <button className="submit-button" onClick={addToKeychain}>Add to keychain</button> :
-        <button 
-          className="submit-button"
-          onClick={redirect}
-        >
-          {/* <Link to="/login"> */}
-            Proceed to login
-          {/* </Link> */}
-        </button>)
-        }
-      </>}
+        {downloaded && !isCreated && (
+        <button className="submit-button" onClick={createHiveAccount}>
+            {loading ? 'Creating account...' : 'Create Account'}
+        </button>
+        )}
+
+        {isCreated && !keychainAdded && (
+        <button className="submit-button" onClick={addToKeychain}>
+            Add to Keychain
+        </button>
+        )}
+
+        {keychainAdded && (
+        <button className="submit-button" onClick={redirect}>
+            Proceed to Login
+        </button>
+        )}
+    </>
+    )}
+
     </div> 
   );
 }
