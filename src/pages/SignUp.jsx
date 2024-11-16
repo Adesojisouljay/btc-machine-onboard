@@ -95,7 +95,7 @@ export const SignUp = () => {
   const getAccountKeys = async (username) => {
     setLoading(true);
     try {
-        const response = await axios.post('http://localhost:4000/get-account-keys', { username });
+        const response = await axios.post('https://api.breakaway.community/get-account-keys', { username });
         console.log("Full response:", response.data);
 
         if (response.data && response.data.accountDetails) {
