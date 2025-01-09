@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { getAddress, signMessage } from '@sats-connect/core';
 import { addAccountTokeychain } from '../api';
+import { getAccount } from '../api/hive';
+import { validateUsername } from '../helpers';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 // import './App.css';
@@ -18,6 +20,14 @@ export const SignUp = () => {
   const [downloaded, setDownloaded] = useState(false);
   const [keychainAdded, setKeychainAdded] = useState(false);
   const [keys, setKeys] = useState(null);
+
+  const debounceTimer = useRef(null);
+
+  useEffect(() => {
+    if (username) {
+      getExistingHiveAccount();
+    }
+  }, [username]);
 
   const handleCreateAccount = async (event) => {
     event.preventDefault();
@@ -257,80 +267,122 @@ export const SignUp = () => {
 
   }
 
+  const validateUsernameWithDelay = (newUsername) => {
+    clearTimeout(debounceTimer.current);
+
+    debounceTimer.current = setTimeout(() => {
+      const isValid = validateUsername(newUsername, setMsg);
+      if (isValid) {
+        console.log("Username is valid!");
+      } else {
+        console.log("Username validation failed.");
+      }
+    }, 500);
+  };
+
+  const usernameChanged = (e) => {
+    const newUsername = e.target.value;
+    setUsername(newUsername);
+    validateUsernameWithDelay(newUsername);
+  };
+
+  const getExistingHiveAccount = async () => {
+    setLoading(true);
+    validateUsernameWithDelay(username);
+    try {
+      const account = await getAccount(username);
+      if (account) {
+        setMsg("Username is already taken");
+        console.log("taken....")
+        // setUsernameAvailable(false);
+      } else {
+        setMsg("Username Available ✅");
+        console.log("avaialble....")
+        // setUsernameAvailable(true);
+      }
+      setLoading(false);
+    } catch (error) {
+      console.log(error);
+      setLoading(false);
+    }
+  };
+
   return (
-    <div className="app-container">
-      <h1>Create A Bitcoin Social Account</h1>
-      <p>You must have a bitcoin machine to get started</p>
-      <p className={serverResponse?.success ? "success" : "error"}>{msg}</p>
-      {step === 1 && <div className="form-container">
-        <form onSubmit={handleCreateAccount} className='acc-form'>
-          <label htmlFor="username">Username:</label>
-          <input
-            id="username"
-            type="text"
-            placeholder='Choose a username'
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            required
-          />
-          <button type="submit" className="submit-button">Get bitcoin Address</button>
-        </form>
-      </div>}
-      
-      {step === 2 && (
-    <>
-        {walletAddress && (
-        <div className="wallet-info">
-            <h3>Wallet Address:</h3>
-            <p>{walletAddress}</p>
-        </div>
-        )}
+    <div className="general-container">
+      <div className="app-container">
+        <h1>Create A Bitcoin Social Account</h1>
+        <p>You must have a bitcoin machine to get started</p>
+        <p className={serverResponse?.success ? "success" : "error"}>{msg}</p>
+        {step === 1 && <div className="form-container">
+          <form onSubmit={handleCreateAccount} className='acc-form'>
+            <label htmlFor="username">Username:</label>
+            <input
+              id="username"
+              type="text"
+              placeholder="Choose a username"
+              value={username}
+              onChange={usernameChanged}
+              required
+            />
+            <button type="submit" className="submit-button">Get bitcoin Address</button>
+          </form>
+        </div>}
+        
+        {step === 2 && (
+      <>
+          {walletAddress && (
+          <div className="wallet-info">
+              <h3>Wallet Address:</h3>
+              <p>{walletAddress}</p>
+          </div>
+          )}
 
-        {signedMessage && (
-        <div className="message-info">
-            <h3>Signed Message:</h3>
-            <p>{JSON.stringify(signedMessage)}</p>
-        </div>
-        )}
+          {signedMessage && (
+          <div className="message-info">
+              <h3>Signed Message:</h3>
+              <p>{JSON.stringify(signedMessage)}</p>
+          </div>
+          )}
 
-        {keys ? (
-        <div className="server-response">
-            <h3>Account Keys:</h3>
-            {!downloaded && <button className="submit-button" onClick={downloadKeys}>
-            Download Keys
-            </button>}
-            <p>Username: {username}</p>
-            <p>Master Password: {keys?.masterPassword}</p>
-            <p>Owner Key: {keys?.owner}</p>
-            <p>Active Key: {keys?.active}</p>
-            <p>Posting Key: {keys?.posting}</p>
-            <p>Memo Key: {keys?.memo}</p>
-        </div>
-        ) : (
-        <button className="submit-button" onClick={() => getAccountKeys(username)}>
-            {loading ? 'Getting keys...' : 'Get Keys'}
-        </button>
-        )}
+          {keys ? (
+          <div className="server-response">
+              <h3>Account Keys:</h3>
+              {!downloaded && <button className="submit-button" onClick={downloadKeys}>
+              Download Keys
+              </button>}
+              <p>Username: {username}</p>
+              <p>Master Password: {keys?.masterPassword}</p>
+              <p>Owner Key: {keys?.owner}</p>
+              <p>Active Key: {keys?.active}</p>
+              <p>Posting Key: {keys?.posting}</p>
+              <p>Memo Key: {keys?.memo}</p>
+          </div>
+          ) : (
+          <button className="submit-button" onClick={() => getAccountKeys(username)}>
+              {loading ? 'Getting keys...' : 'Get Keys'}
+          </button>
+          )}
 
-        {downloaded && !isCreated && (
-        <button className="submit-button" onClick={createHiveAccount}>
-            {loading ? 'Creating account...' : 'Create Account'}
-        </button>
-        )}
+          {downloaded && !isCreated && (
+          <button className="submit-button" onClick={createHiveAccount}>
+              {loading ? 'Creating account...' : 'Create Account'}
+          </button>
+          )}
 
-        {isCreated && !keychainAdded && (
-        <button className="submit-button" onClick={addToKeychain}>
-            Add to Keychain
-        </button>
-        )}
+          {isCreated && !keychainAdded && (
+          <button className="submit-button" onClick={addToKeychain}>
+              Add to Keychain
+          </button>
+          )}
 
-        {keychainAdded && (
-        <button className="submit-button" onClick={redirect}>
-            Proceed to Login
-        </button>
-        )}
-    </>
-    )}
-    </div> 
+          {keychainAdded && (
+          <button className="submit-button" onClick={redirect}>
+              Proceed to Login
+          </button>
+          )}
+      </>
+      )}
+      </div> 
+    </div>
   );
 }
