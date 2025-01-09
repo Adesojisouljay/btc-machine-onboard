@@ -181,31 +181,33 @@ export const Login = () => {
   }  
 
   return (
-     <div className="app-container">
-      <h1>Login</h1>
-      <div className="form-container">
-        <form onSubmit={handleCreateAccount} className='acc-form'>
-          <label htmlFor="username">Username:</label>
-          <input
-            id="username"
-            type="text"
-            placeholder='Choose a username'
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            required
-          />
-          <button 
-            type="submit" 
-            className="submit-button"
-          >
-            <img
-            className='keychain-logo'
-              src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTF0wPMyXXA0D62n1Rl2EAAJkUUI33czT7Pgw&s" 
-              alt='keychain'
+    <div className='general-container'>
+      <div className="app-container">
+        <h1>Login</h1>
+        <div className="form-container">
+          <form onSubmit={handleCreateAccount} className='acc-form'>
+            <label htmlFor="username">Username:</label>
+            <input
+              id="username"
+              type="text"
+              placeholder='Choose a username'
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              required
             />
-            Login
-          </button>
-        </form>
+            <button 
+              type="submit" 
+              className="submit-button"
+            >
+              <img
+              className='keychain-logo'
+                src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTF0wPMyXXA0D62n1Rl2EAAJkUUI33czT7Pgw&s" 
+                alt='keychain'
+              />
+              Login
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   );
