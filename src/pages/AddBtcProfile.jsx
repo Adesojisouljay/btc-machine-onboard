@@ -1,36 +1,16 @@
 import React, { useState } from 'react'
 import axios from 'axios';
 import { getAddress, signMessage } from '@sats-connect/core';
+import { getWalletAddress } from '../helpers';
 
 export const AddBtcProfile = () => {
 
     const [username, setUsername] = useState("");
     const [walletAddress, setWalletAddress] = useState(null);
+    const [ordinalAddress, setOrdinalAddress] = useState(null);
     const [signedMessage, setSignedMessage] = useState(null);
     const [messageToSign, setMessageToSign] = useState(null);
-    const [step, setStep] = useState(1)
-
-    const getWalletAddress = () => {
-        return new Promise((resolve, reject) => {
-          const getAddressOptions = {
-            payload: {
-              purposes: ['payment'],
-              message: 'Address for creating Hive account',
-              network: {
-                type: 'Mainnet'
-              },
-            },
-            onFinish: (response) => {
-              console.log('onFinish response:', response);
-              resolve(response.addresses);
-            },
-            onCancel: () => reject(new Error('Request canceled')),
-          };
-    
-        getAddress(getAddressOptions);
-        
-        });
-      };
+    const [step, setStep] = useState(1);
     
       const signMessageFromWallet = (address, message) => {
         return new Promise((resolve, reject) => {
@@ -56,9 +36,11 @@ export const AddBtcProfile = () => {
         e.preventDefault()
         try {
             const walletAddresses = await getWalletAddress();
-            const bitcoinAddress = walletAddresses[0]?.address;
-            console.log("....add",bitcoinAddress)
+            const bitcoinAddress = walletAddresses.find(addr => addr.purpose === 'payment')?.address;
+            const ordinalAddress = walletAddresses.find(addr => addr.purpose === 'ordinals')?.address;
+
             setWalletAddress(bitcoinAddress)
+            setOrdinalAddress(ordinalAddress)
             setMessageToSign(`Hive:${username}`)
             setStep(2)
         } catch (error) {
@@ -97,17 +79,17 @@ export const AddBtcProfile = () => {
                     metadata = JSON.parse(data.result[0].posting_json_metadata || '{}');
                 } catch (e) {
                     console.error('Error parsing existing metadata:', e);
-                    metadata = {}; // Default to empty metadata if parsing fails
+                    metadata = {}; // Default to empty
                 }
     
-                // Update Bitcoin details in the metadata
+                // Update  metadata
                 metadata.bitcoin = {
                     address: walletAddress,
+                    ordinalAddress: ordinalAddress,
                     signature: signedMessage,
                     message: messageToSign
                 };
     
-                // Step 3: Broadcast the updated metadata
                 const operations = [
                     ['account_update2', {
                         account: username,
@@ -116,6 +98,9 @@ export const AddBtcProfile = () => {
                         extensions: []
                     }]
                 ];
+
+               const added = await updateAccountBtcInfo();
+               console.log("addedd..", added)
     
                 window.hive_keychain.requestBroadcast(username, operations, 'posting', (response) => {
                     if (response.success) {
@@ -133,6 +118,32 @@ export const AddBtcProfile = () => {
             alert('Error fetching or updating account details: ' + error.message);
         }
     }
+
+    const updateAccountBtcInfo = async () => {
+      try {
+          const apiUrl = 'https://api.breakaway.community/update-account-btc'
+          const payload = {
+              username,
+              address: walletAddress,
+              ordinalAddress,
+              signature: signedMessage,
+              message: messageToSign
+          };
+  
+          const { data } = await axios.post(apiUrl, payload);
+  
+          if (data.success) {
+              alert('Account updated successfully with BTC info!');
+              console.log('Response:', data);
+          } else {
+              alert('Failed to update account: ' + data.message);
+              console.error('Error:', data);
+          }
+      } catch (error) {
+          console.error('Error updating account with BTC info:', error);
+          alert('An error occurred while updating account: ' + error.message);
+      }
+  };  
 
   return (
     <div className='general-container'>
@@ -158,7 +169,8 @@ export const AddBtcProfile = () => {
           </form>
         </div> : step === 2 ?
         <div className="acc-info-container">
-            <span>Address: {walletAddress}</span>
+            <span>Payment Address: {walletAddress}</span>
+            <span>Ordinals Address: {ordinalAddress}</span>
             <span>Message: {messageToSign}</span>
             {signedMessage && <span>Signature: {signedMessage}</span>}
             {!signedMessage ? <button 

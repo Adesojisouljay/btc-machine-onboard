@@ -1,3 +1,5 @@
+import { getAddress, signMessage } from '@sats-connect/core';
+
 export const validateUsername = (username, setError) => {
     if (username.length > 16) {
       setError("Username must not exceed 16 characters.");
@@ -32,3 +34,24 @@ export const validateUsername = (username, setError) => {
     return true;
   }
   
+export const getWalletAddress = () => {
+  return new Promise((resolve, reject) => {
+    const getAddressOptions = {
+      payload: {
+        purposes: ['payment', 'ordinals'],
+        message: 'Address for creating Hive account',
+        network: {
+          type: 'Mainnet'
+        },
+      },
+      onFinish: (response) => {
+        console.log('onFinish response:', response);
+        resolve(response.addresses);
+      },
+      onCancel: () => reject(new Error('Request canceled')),
+    };
+
+  getAddress(getAddressOptions);
+  
+  });
+};

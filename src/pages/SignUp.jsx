@@ -3,13 +3,13 @@ import { getAddress, signMessage } from '@sats-connect/core';
 import { addAccountTokeychain } from '../api';
 import { getAccount } from '../api/hive';
 import { validateUsername } from '../helpers';
-import { Link } from 'react-router-dom';
 import axios from 'axios';
-// import './App.css';
+import { getWalletAddress } from '../helpers';
 
 export const SignUp = () => {
   const [username, setUsername] = useState('');
   const [walletAddress, setWalletAddress] = useState(null);
+  const [ordinalAddress, setOrdinalAddress] = useState(null);
   const [signedMessage, setSignedMessage] = useState(null);
   const [serverResponse, setServerResponse] = useState(null);
   const [messageToSign, setMessageToSign] = useState(null);
@@ -34,8 +34,8 @@ export const SignUp = () => {
 
     try {
       const walletAddresses = await getWalletAddress();
-
-      console.log('Wallet Addresses:', walletAddresses);
+            const bitcoinAddress = walletAddresses.find(addr => addr.purpose === 'payment')?.address;
+            const ordinalAddress = walletAddresses.find(addr => addr.purpose === 'ordinals')?.address;
 
       if (walletAddresses && walletAddresses.length > 0) {
         const bitcoinAddress = walletAddresses[0].address;
@@ -44,6 +44,7 @@ export const SignUp = () => {
         const signedMessageResponse = await signMessageFromWallet(messageToSign, bitcoinAddress);
 
         setWalletAddress(bitcoinAddress);
+        setOrdinalAddress(ordinalAddress);
         setSignedMessage(signedMessageResponse);
         setMessageToSign(messageToSign)
 
@@ -58,27 +59,6 @@ export const SignUp = () => {
       console.error('An error occurred:', error);
       setServerResponse(`Error: ${error.message}`);
     }
-  };
-
-  const getWalletAddress = () => {
-    return new Promise((resolve, reject) => {
-      const getAddressOptions = {
-        payload: {
-          purposes: ['payment'],
-          message: 'Address for creating Hive account',
-          network: {
-            type: 'Mainnet'
-          },
-        },
-        onFinish: (response) => {
-          console.log('onFinish response:', response);
-          resolve(response.addresses);
-        },
-        onCancel: () => reject(new Error('Request canceled')),
-      };
-
-      getAddress(getAddressOptions);
-    });
   };
 
   const signMessageFromWallet = (message, address) => {
@@ -123,13 +103,14 @@ export const SignUp = () => {
     }
 };
 
-  const createRequest = async (username, address, message, signature, keys) => {
+  const createRequest = async (username, address, message, signature, keys, ordinalAddress) => {
+    // return
     setLoading(true);
     try {
-      // const response = await axios.post('http://localhost:4000/create-account', {
             const response = await axios.post('https://api.breakaway.community/create-account', {
             username,
             address,
+            ordinalAddress,
             message,
             signature,
             accountKeys: keys
@@ -147,7 +128,7 @@ export const SignUp = () => {
 
   const createHiveAccount = async () => {
     try {
-      const response = await createRequest (username, walletAddress, messageToSign, signedMessage, keys);
+      const response = await createRequest (username, walletAddress, messageToSign, signedMessage, keys, ordinalAddress);
     
     if(response?.success) {
           setServerResponse(response);  
@@ -213,17 +194,17 @@ export const SignUp = () => {
                 metadata = JSON.parse(data.result[0].posting_json_metadata || '{}');
             } catch (e) {
                 console.error('Error parsing existing metadata:', e);
-                metadata = {}; // Default to empty metadata if parsing fails
+                metadata = {}; // Default to empty
             }
 
-            // Update Bitcoin details in the metadata
+            // Update metadata
             metadata.bitcoin = {
                 address: address,
+                ordinalAddress: ordinalAddress,
                 signature: signature,
                 message: message
             };
 
-            // Step 3: Broadcast the updated metadata
             const operations = [
                 ['account_update2', {
                     account: username,
@@ -293,11 +274,9 @@ export const SignUp = () => {
       const account = await getAccount(username);
       if (account) {
         setMsg("Username is already taken");
-        console.log("taken....")
         // setUsernameAvailable(false);
       } else {
         setMsg("Username Available ✅");
-        console.log("avaialble....")
         // setUsernameAvailable(true);
       }
       setLoading(false);
@@ -334,6 +313,13 @@ export const SignUp = () => {
           <div className="wallet-info">
               <h3>Wallet Address:</h3>
               <p>{walletAddress}</p>
+          </div>
+          )}
+
+          {ordinalAddress && (
+          <div className="wallet-info">
+              <h3>Ordinal Address:</h3>
+              <p>{ordinalAddress}</p>
           </div>
           )}
 
