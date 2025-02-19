@@ -1,9 +1,12 @@
-import React, { useState } from 'react'
+import React, { useState, useRef } from 'react'
 import axios from 'axios';
 import { getAddress, signMessage } from '@sats-connect/core';
-import { getWalletAddress } from '../helpers';
+import { getWalletAddress, validateUsername } from '../helpers';
+import { getAccount } from '../api/hive';
 
 export const AddBtcProfile = () => {
+
+    const debounceTimer = useRef(null);
 
     const [username, setUsername] = useState("");
     const [walletAddress, setWalletAddress] = useState(null);
@@ -11,6 +14,8 @@ export const AddBtcProfile = () => {
     const [signedMessage, setSignedMessage] = useState(null);
     const [messageToSign, setMessageToSign] = useState(null);
     const [step, setStep] = useState(1);
+    const [usernameAvailable, setUsernameAvailable] = useState(false)
+    const [msg, setMsg] = useState("");
     
       const signMessageFromWallet = (address, message) => {
         return new Promise((resolve, reject) => {
@@ -143,12 +148,40 @@ export const AddBtcProfile = () => {
           console.error('Error updating account with BTC info:', error);
           alert('An error occurred while updating account: ' + error.message);
       }
-  };  
+  };
+
+  const validateUsernameWithDelay = async (newUsername) => {
+    clearTimeout(debounceTimer.current);
+
+    debounceTimer.current = setTimeout(async () => {
+      const isValid = await validateUsername(newUsername, setMsg);
+         const existingAccount = await getAccount(newUsername)
+      console.log(isValid, "is valid...", existingAccount);
+      if (existingAccount !== undefined) {
+          setUsernameAvailable(true)
+          setMsg("Username is valid")
+          console.log("Username is valid!");
+        } else {
+          setUsernameAvailable(false)
+        setMsg("Provided username is invalid")
+        console.log("Username validation failed.");
+      }
+    }, 500);
+  };
+
+
+  const usernameChanged = async (e) => {
+
+      const newUsername = e.target.value;
+    setUsername(newUsername.toLowerCase());
+    await validateUsernameWithDelay(newUsername);
+  };
 
   return (
     <div className='general-container'>
       <div className="app-container">
         <h1>Add existing hive username</h1>
+        <p className={usernameAvailable ? "success" : "error"}>{msg}</p>
         {step === 1 ? <div className="form-container">
           <form className='acc-form'>
             <label htmlFor="username">Username:</label>
@@ -157,10 +190,12 @@ export const AddBtcProfile = () => {
               type="text"
               placeholder='Enter hive username'
               value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              onChange={usernameChanged}
               required
             />
-            <button 
+            <button
+              style={{cursor: usernameAvailable ? "pointer" : "not-allowed"}}
+              disabled={!usernameAvailable}
               className="submit-button"
               onClick={getBitcoinAddress}
             >
