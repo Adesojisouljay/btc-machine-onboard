@@ -20,14 +20,9 @@ export const SignUpOneBtcClub = () => {
   const [downloaded, setDownloaded] = useState(false);
   const [keychainAdded, setKeychainAdded] = useState(false);
   const [keys, setKeys] = useState(null);
+  const [usernameAvailable, setUsernameAvailable] = useState(false)
 
   const debounceTimer = useRef(null);
-
-  useEffect(() => {
-    if (username) {
-      getExistingHiveAccount();
-    }
-  }, [username]);
 
   const handleCreateAccount = async (event) => {
     event.preventDefault();
@@ -246,11 +241,13 @@ const getAccountKeys = async (username) => {
 
   }
 
-  const validateUsernameWithDelay = (newUsername) => {
+  const validateUsernameWithDelay = async (newUsername) => {
     clearTimeout(debounceTimer.current);
 
-    debounceTimer.current = setTimeout(() => {
-      const isValid = validateUsername(newUsername, setMsg);
+    debounceTimer.current = setTimeout(async () => {
+      const isValid = await validateUsername(newUsername, setMsg);
+      console.log(isValid, "is valid...");
+      setUsernameAvailable(isValid)
       if (isValid) {
         console.log("Username is valid!");
       } else {
@@ -259,23 +256,26 @@ const getAccountKeys = async (username) => {
     }, 500);
   };
 
-  const usernameChanged = (e) => {
+  const usernameChanged = async (e) => {
     const newUsername = e.target.value;
-    setUsername(newUsername);
-    validateUsernameWithDelay(newUsername);
+    setUsername(newUsername.toLowerCase());
+    await validateUsernameWithDelay(newUsername);
   };
 
+
+  /////shoukld be removed
   const getExistingHiveAccount = async () => {
     setLoading(true);
-    validateUsernameWithDelay(username);
+    console.log(username)
     try {
       const account = await getAccount(username);
-      if (account) {
+      const isNameValid =  validateUsernameWithDelay(username);
+      console.log(account, account === undefined)
+        if(account) {
         setMsg("Username is already taken");
-        // setUsernameAvailable(false);
-      } else {
-        setMsg("Username Available ✅");
-        // setUsernameAvailable(true);
+        setUsernameAvailable(false);
+      } else if (account === undefined && isNameValid) {
+        setUsernameAvailable(true);
       }
       setLoading(false);
     } catch (error) {
@@ -289,7 +289,8 @@ const getAccountKeys = async (username) => {
       <div className="app-container">
         <h1>Create A Bitcoin Social Account</h1>
         <p>You need at least 5,000 satoshis in your Xverse wallet to get a free account</p>
-        <p className={serverResponse?.success ? "success" : "error"}>{msg}</p>
+        {step === 1 ? <p className={usernameAvailable ? "success" : "error"}>{msg}</p> :
+        <p className={(serverResponse?.success) ? "success" : "error"}>{msg}</p>}
         {step === 1 && <div className="form-container">
           <form onSubmit={handleCreateAccount} className='acc-form'>
             <label htmlFor="username">Username:</label>
@@ -301,7 +302,14 @@ const getAccountKeys = async (username) => {
               onChange={usernameChanged}
               required
             />
-            <button type="submit" className="submit-button">Get bitcoin Address</button>
+            <button
+              style={{cursor: usernameAvailable ? "pointer" : "not-allowed"}}
+              disabled={!usernameAvailable}
+              type="submit" 
+              className="submit-button"
+            >
+              Get bitcoin Address
+            </button>
           </form>
         </div>}
         
@@ -314,12 +322,12 @@ const getAccountKeys = async (username) => {
           </div>
           )}
 
-          {ordinalAddress && (
+          {/* {ordinalAddress && (
             <div className="wallet-info">
                 <h3>Ordinal Address:</h3>
                 <p>{ordinalAddress}</p>
             </div>
-          )}
+          )} */}
 
           {signedMessage && (
           <div className="message-info">

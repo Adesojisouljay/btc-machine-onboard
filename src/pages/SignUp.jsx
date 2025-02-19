@@ -20,14 +20,15 @@ export const SignUp = () => {
   const [downloaded, setDownloaded] = useState(false);
   const [keychainAdded, setKeychainAdded] = useState(false);
   const [keys, setKeys] = useState(null);
+  const [usernameAvailable, setUsernameAvailable] = useState(false)
 
   const debounceTimer = useRef(null);
 
-  useEffect(() => {
-    if (username) {
-      getExistingHiveAccount();
-    }
-  }, [username]);
+  // useEffect(() => {
+  //   if (username) {
+  //     getExistingHiveAccount();
+  //   }
+  // }, [username]);
 
   const handleCreateAccount = async (event) => {
     event.preventDefault();
@@ -248,11 +249,12 @@ export const SignUp = () => {
 
   }
 
-  const validateUsernameWithDelay = (newUsername) => {
+  const validateUsernameWithDelay = async (newUsername) => {
     clearTimeout(debounceTimer.current);
 
-    debounceTimer.current = setTimeout(() => {
-      const isValid = validateUsername(newUsername, setMsg);
+    debounceTimer.current = setTimeout(async () => {
+      const isValid = await validateUsername(newUsername, setMsg);
+      setUsernameAvailable(isValid)
       if (isValid) {
         console.log("Username is valid!");
       } else {
@@ -261,10 +263,10 @@ export const SignUp = () => {
     }, 500);
   };
 
-  const usernameChanged = (e) => {
+  const usernameChanged = async (e) => {
     const newUsername = e.target.value;
-    setUsername(newUsername);
-    validateUsernameWithDelay(newUsername);
+    setUsername(newUsername.toLowerCase());
+    await validateUsernameWithDelay(newUsername);
   };
 
   const getExistingHiveAccount = async () => {
@@ -291,7 +293,8 @@ export const SignUp = () => {
       <div className="app-container">
         <h1>Create A Bitcoin Social Account</h1>
         <p>You must have a bitcoin machine to get started</p>
-        <p className={serverResponse?.success ? "success" : "error"}>{msg}</p>
+        {step === 1 ? <p className={usernameAvailable ? "success" : "error"}>{msg}</p> :
+        <p className={(serverResponse?.success) ? "success" : "error"}>{msg}</p>}
         {step === 1 && <div className="form-container">
           <form onSubmit={handleCreateAccount} className='acc-form'>
             <label htmlFor="username">Username:</label>
@@ -303,7 +306,14 @@ export const SignUp = () => {
               onChange={usernameChanged}
               required
             />
-            <button type="submit" className="submit-button">Get bitcoin Address</button>
+            <button
+              style={{cursor: usernameAvailable ? "pointer" : "not-allowed"}}
+              disabled={!usernameAvailable}
+              type="submit" 
+              className="submit-button"
+            >
+              Get bitcoin Address
+            </button>
           </form>
         </div>}
         
@@ -316,12 +326,12 @@ export const SignUp = () => {
           </div>
           )}
 
-          {ordinalAddress && (
+          {/* {ordinalAddress && (
           <div className="wallet-info">
               <h3>Ordinal Address:</h3>
               <p>{ordinalAddress}</p>
           </div>
-          )}
+          )} */}
 
           {signedMessage && (
           <div className="message-info">
