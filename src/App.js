@@ -24,12 +24,12 @@ function App() {
           >
             Home
           </NavLink>
-          <NavLink 
+          {/* <NavLink 
             className={({ isActive }) => isActive ? 'nav-links active' : 'nav-links'}
             to="/signup"
           >
             Btc Machine
-          </NavLink>
+          </NavLink> */}
           <NavLink 
             className={({ isActive }) => isActive ? 'nav-links active' : 'nav-links'}
             to="/one-btc-signup"
@@ -40,7 +40,7 @@ function App() {
             className={({ isActive }) => isActive ? 'nav-links active' : 'nav-links'}
             to="/add-btc-profile"
           >
-            Add Btc Profile
+            Existing Hive Account
           </NavLink>
         </div>
       </div>

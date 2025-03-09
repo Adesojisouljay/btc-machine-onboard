@@ -41,29 +41,30 @@ export const Home = () => {
                   allowfullscreen
                 ></iframe>
               {/* </div> */}
+              <p>See video below on how to set up your account</p>
+                <iframe
+                  width="700"
+                  height="400"
+                  src="https://3speak.tv/embed?v=artakush/yetsndrp"
+                  title="Xverse wallet setup"
+                  frameborder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowfullscreen
+                ></iframe>
 
-              {/* <p>
-                <a
-                    className='links'
-                    href='https://www.youtube.com/watch?v=bYN7FHnNH0w'
-                    target="_blank"
-                >
-                    Xvers set up tutorial
-                </a>
-              </p> */}
           </h3>
           
         </div>
         <div>
             <h3>After successfully installing hive keychain and Xverse extensions</h3>
             <div className='login-links-wrapper'>
-              <div className="btc-machine">
+              {/* <div className="btc-machine">
                   <p>Get a BTC machines social account and earn for posting</p>
                   <Link className='links' to="/signup">
                     <button className='home-btn'>Get started</button>
                   </Link>
               </div>
-              <h4>OR</h4>
+              <h4>OR</h4> */}
               <div className="btc-address">
                 <p>Get BTC social account and earn for posting</p>
                 <Link className='links' to="/one-btc-signup">

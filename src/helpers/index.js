@@ -3,9 +3,12 @@ import { getAccount } from '../api/hive';
 
 export const validateUsername = async (username, setError) => {
 
+  if(username === ""){
+    setError("")
+  }
+
   try {
       const account = await getAccount(username);
-      console.log("object", account)
 
       if (account && account !== undefined) {
         setError("Username is already taken");
