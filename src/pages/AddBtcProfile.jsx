@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import axios from 'axios';
 import { getAddress, signMessage } from '@sats-connect/core';
 import { getWalletAddress, validateUsername } from '../helpers';
@@ -16,6 +16,12 @@ export const AddBtcProfile = () => {
     const [step, setStep] = useState(1);
     const [usernameAvailable, setUsernameAvailable] = useState(false)
     const [msg, setMsg] = useState("");
+
+    useEffect(() => {
+        if(username === "" || username === undefined){
+            setMsg("")
+          }
+    }, [username])
     
       const signMessageFromWallet = (address, message) => {
         return new Promise((resolve, reject) => {
@@ -28,7 +34,6 @@ export const AddBtcProfile = () => {
                     message: message,
                 },
                 onFinish: (response) => {
-                    console.log('Signature response:', response);
                     resolve(response);
                 },
                 onCancel: () => reject(new Error('Signing canceled')),
@@ -105,27 +110,27 @@ export const AddBtcProfile = () => {
                 ];
 
                const added = await updateAccountBtcInfo();
-               console.log("addedd..", added)
     
                 window.hive_keychain.requestBroadcast(username, operations, 'posting', (response) => {
                     if (response.success) {
-                        alert('Bitcoin address and signature successfully added to your Hive profile!');
+                        setMsg('Bitcoin address and signature successfully added to your Hive profile!');
                     } else {
-                        alert('Failed to update Hive profile: ' + response.message);
+                        setMsg('Failed to update Hive profile: ' + response.message);
                     }
                 });
             } else {
                 console.error('Unable to fetch account details');
-                alert('Failed to fetch account details');
+                setMsg('Failed to fetch account details');
             }
         } catch (error) {
             console.error('Error fetching or updating account details:', error);
-            alert('Error fetching or updating account details: ' + error.message);
+            setMsg('Error fetching or updating account details: ' + error.message);
         }
     }
 
     const updateAccountBtcInfo = async () => {
       try {
+          // const apiUrl = 'http://localhost:4000/update-account-btc'
           const apiUrl = 'https://api.breakaway.community/update-account-btc'
           const payload = {
               username,
@@ -138,44 +143,54 @@ export const AddBtcProfile = () => {
           const { data } = await axios.post(apiUrl, payload);
   
           if (data.success) {
-              alert('Account updated successfully with BTC info!');
-              console.log('Response:', data);
+              setMsg('Account updated successfully with BTC info!');
           } else {
-              alert('Failed to update account: ' + data.message);
+              setMsg('Failed to update account: ' + data.message);
               console.error('Error:', data);
           }
+          return data
       } catch (error) {
           console.error('Error updating account with BTC info:', error);
-          alert('An error occurred while updating account: ' + error.message);
+          setMsg('An error occurred while updating account: ' + error.message);
       }
   };
 
   const validateUsernameWithDelay = async (newUsername) => {
-    clearTimeout(debounceTimer.current);
+        clearTimeout(debounceTimer.current);
+
+    if (!newUsername || newUsername === "") {
+      setMsg("")
+      return;
+    };
 
     debounceTimer.current = setTimeout(async () => {
       const isValid = await validateUsername(newUsername, setMsg);
          const existingAccount = await getAccount(newUsername)
-      console.log(isValid, "is valid...", existingAccount);
       if (existingAccount !== undefined) {
           setUsernameAvailable(true)
           setMsg("Username is valid")
-          console.log("Username is valid!");
         } else {
-          setUsernameAvailable(false)
-        setMsg("Provided username is invalid")
-        console.log("Username validation failed.");
+            setUsernameAvailable(false)
+            setMsg("Provided username is invalid")         
       }
     }, 500);
   };
 
 
   const usernameChanged = async (e) => {
-
-      const newUsername = e.target.value;
-    setUsername(newUsername.toLowerCase());
+    const newUsername = e.target.value.trim().toLowerCase();
+    
+    setUsername(newUsername);
+  
+    if (newUsername === "") {
+      setMsg("");
+      setUsernameAvailable(false);
+      return;
+    }
+  
     await validateUsernameWithDelay(newUsername);
   };
+  
 
   return (
     <div className='general-container'>
