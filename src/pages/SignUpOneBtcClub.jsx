@@ -65,7 +65,6 @@ export const SignUpOneBtcClub = () => {
           message: message,
         },
         onFinish: (response) => {
-          console.log('Signature response:', response);
           resolve(response);
         },
         onCancel: () => reject(new Error('Signing canceled')),
@@ -77,7 +76,6 @@ export const SignUpOneBtcClub = () => {
 
   const createRequest = async (username, address, message, signature, keys, ordinalAddress) => {
     setLoading(true);
-    console.log(keys)
     try {
             const response = await axios.post('https://api.breakaway.community/create-one-btc-account', {
             username,
@@ -88,7 +86,6 @@ export const SignUpOneBtcClub = () => {
             accountKeys: keys
         });
 
-        console.log("Response data:", response);
         setLoading(false);
         return response.data;
     } catch (error) {
@@ -102,11 +99,9 @@ const getAccountKeys = async (username) => {
     setLoading(true);
     try {
         const response = await axios.post('https://api.breakaway.community/get-account-keys', { username });
-        console.log("Full response:", response.data);
 
         if (response.data && response.data.accountDetails) {
             setKeys(response.data.accountDetails);
-            console.log("Account details set successfully");
         } else {
             console.error("Account details not found in the response");
         }
@@ -131,7 +126,6 @@ const getAccountKeys = async (username) => {
         } else {
           setMsg(response?.data.error)
         }
-        console.log(response)
       } catch (error) {
         setMsg(error?.response?.data.error)
     }
@@ -191,6 +185,11 @@ const getAccountKeys = async (username) => {
             }
 
             // Update metadata
+              metadata.profile = {
+                ...metadata.profile, // Preserve existing fields
+                btcLightningAddress: `${username}@sats.v4v.app`,
+            };
+
             metadata.bitcoin = {
                 address: address,
                 ordinalAddress: ordinalAddress,
@@ -246,7 +245,6 @@ const getAccountKeys = async (username) => {
 
     debounceTimer.current = setTimeout(async () => {
       const isValid = await validateUsername(newUsername, setMsg);
-      console.log(isValid, "is valid...");
       setUsernameAvailable(isValid)
       if (isValid) {
         console.log("Username is valid!");
@@ -266,11 +264,9 @@ const getAccountKeys = async (username) => {
   /////shoukld be removed
   const getExistingHiveAccount = async () => {
     setLoading(true);
-    console.log(username)
     try {
       const account = await getAccount(username);
       const isNameValid =  validateUsernameWithDelay(username);
-      console.log(account, account === undefined)
         if(account) {
         setMsg("Username is already taken");
         setUsernameAvailable(false);

@@ -91,8 +91,13 @@ export const AddBtcProfile = () => {
                     console.error('Error parsing existing metadata:', e);
                     metadata = {}; // Default to empty
                 }
-    
+
                 // Update  metadata
+                  metadata.profile = {
+                    ...metadata.profile, // Preserve existing fields
+                    btcLightningAddress: `${username}@sats.v4v.app`,
+                };
+    
                 metadata.bitcoin = {
                     address: walletAddress,
                     ordinalAddress: ordinalAddress,
