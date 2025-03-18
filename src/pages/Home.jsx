@@ -17,7 +17,7 @@ export const Home = () => {
                   href='https://hive-keychain.com/'
                   target="_blank"
               >
-                  Please install keychain extension here
+                  1. Please install keychain extension here
                   {/* https://www.youtube.com/watch?v=q1WDbMhQOEU */}
               </a>
           </h3>
@@ -27,7 +27,7 @@ export const Home = () => {
                   href='https://www.xverse.app/'
                   target="_blank"
               >
-                  Please install Xverse wallet extension here
+                 2. Please install Xverse wallet extension here
               </a>
               {/* <div style={{}}> */}
                 <p>Watch Xvers set up tutorial below</p>
@@ -36,21 +36,46 @@ export const Home = () => {
                   height="400"
                   src="https://www.youtube.com/embed/bYN7FHnNH0w"
                   title="Xverse wallet setup"
-                  frameborder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowfullscreen
+                  style={{ border: 0 }}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+                  allowFullScreen
                 ></iframe>
               {/* </div> */}
-              <p>See video below on how to set up your account</p>
+              <div className='tutorials-sections'>
+                <p>See video below on how to set up your account</p>
+                <div className="video-iframes">
                 <iframe
-                  width="700"
-                  height="400"
-                  src="https://3speak.tv/embed?v=artakush/yetsndrp"
-                  title="Xverse wallet setup"
-                  frameborder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowfullscreen
-                ></iframe>
+                    width="700"
+                    height="200"
+                    src="https://3speak.tv/embed?v=artakush/yetsndrp"
+                    title="Xverse wallet setup"
+                    style={{ border: 0 }}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+                    allowFullScreen
+                  ></iframe>
+
+                <iframe
+                    width="700"
+                    height="200"
+                    src="https://3speak.tv/embed?v=neopch/zxhupbzu"
+                    title="Xverse wallet setup"
+                    style={{ border: 0 }}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+                    allowFullScreen
+                  ></iframe>
+
+                <iframe
+                    width="700"
+                    height="200"
+                    src="https://3speak.tv/embed?v=neopch/kwgfvehg"
+                    title="Xverse wallet setup"
+                    style={{ border: 0 }}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+                    allowFullScreen
+                  ></iframe>
+                </div>
+
+              </div>
 
           </h3>
           
@@ -66,7 +91,7 @@ export const Home = () => {
               </div>
               <h4>OR</h4> */}
               <div className="btc-address">
-                <p>Get BTC social account and earn for posting</p>
+                <p>3. Get BTC social account and earn for posting</p>
                 <Link className='links' to="/one-btc-signup">
                   <button className='home-btn'>Get started</button>
                 </Link>

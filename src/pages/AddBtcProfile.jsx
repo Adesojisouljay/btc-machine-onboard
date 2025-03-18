@@ -241,6 +241,19 @@ export const AddBtcProfile = () => {
             Connect to Hive account
           </button>}
         </div> : <></>}
+
+        <>
+          <p>Watch Tutorial</p>
+          <iframe
+            width="900"
+            height="400"
+            src="https://3speak.tv/embed?v=neopch/kwgfvehg"
+            title="Xverse wallet setup"
+            style={{ border: 0 }}
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+            allowFullScreen
+          ></iframe>
+        </>
       </div>
     </div>
 
