@@ -93,10 +93,12 @@ export const AddBtcProfile = () => {
                 }
 
                 // Update  metadata
-                  metadata.profile = {
-                    ...metadata.profile, // Preserve existing fields
-                    btcLightningAddress: `${username}@sats.v4v.app`,
-                };
+                if(!metadata.profile.btcLightningAddress) { ////check if user already has a sats address
+                    metadata.profile = {
+                      ...metadata.profile, // Preserve existing fields
+                      btcLightningAddress: `${username}@sats.v4v.app`,
+                  };
+                }
     
                 metadata.bitcoin = {
                     address: walletAddress,
