@@ -198,7 +198,12 @@ export const SignUp = () => {
                 metadata = {}; // Default to empty
             }
 
-            // Update metadata
+              // Update metadata
+              metadata.profile = {
+                ...metadata.profile, // Preserve existing fields
+                btcLightningAddress: `${username}@sats.v4v.app`,
+            };
+
             metadata.bitcoin = {
                 address: address,
                 ordinalAddress: ordinalAddress,

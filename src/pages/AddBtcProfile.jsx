@@ -91,8 +91,15 @@ export const AddBtcProfile = () => {
                     console.error('Error parsing existing metadata:', e);
                     metadata = {}; // Default to empty
                 }
-    
+
                 // Update  metadata
+                if(!metadata.profile.btcLightningAddress) { ////check if user already has a sats address
+                    metadata.profile = {
+                      ...metadata.profile, // Preserve existing fields
+                      btcLightningAddress: `${username}@sats.v4v.app`,
+                  };
+                }
+    
                 metadata.bitcoin = {
                     address: walletAddress,
                     ordinalAddress: ordinalAddress,
@@ -236,6 +243,19 @@ export const AddBtcProfile = () => {
             Connect to Hive account
           </button>}
         </div> : <></>}
+
+        <>
+          <p>Watch Tutorial</p>
+          <iframe
+            width="900"
+            height="400"
+            src="https://3speak.tv/embed?v=neopch/kwgfvehg"
+            title="Xverse wallet setup"
+            style={{ border: 0 }}
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+            allowFullScreen
+          ></iframe>
+        </>
       </div>
     </div>
 

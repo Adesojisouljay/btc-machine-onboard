@@ -14,7 +14,7 @@ function App() {
         <img 
           className='nav-img'
           ////Will update with right icon later
-          src="https://c8.alamy.com/comp/T2B0HY/bitcoin-atm-machine-T2B0HY.jpg" 
+          src="https://images.ecency.com/u/hive-125568/avatar/lardge" 
           alt="Bitcoin Logo" 
         />
         <div className='menu-items'>
@@ -34,7 +34,7 @@ function App() {
             className={({ isActive }) => isActive ? 'nav-links active' : 'nav-links'}
             to="/one-btc-signup"
           >
-            One Btc Club
+            Create New Account
           </NavLink>
           <NavLink 
             className={({ isActive }) => isActive ? 'nav-links active' : 'nav-links'}
